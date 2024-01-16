@@ -10,7 +10,7 @@ from torch_geometric.utils import to_networkx
 from collections import Counter 
 from typing import Literal, Union, Optional, List
 
-df = pd.read_csv('rabobank_data.csv',sep=';') # the data covers transfer before the 2020 
+df = pd.read_csv('data/rabobank_data.csv',sep=';') # the data covers transfer before the 2020 
 
 def clean_data(df, drop_year = True):
     modified_df = df.groupby(['start_id','end_id'],as_index=False).sum()
