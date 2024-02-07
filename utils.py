@@ -7,13 +7,13 @@ from collections import Counter
 from typing import Literal, Union, Optional, List
 
 
-def get_nx_G_from_edgelist(path,edge_attrs: List = ['count','total']):
+def get_nx_G_from_edgelist(path,edge_attrs: List = ['total','count']):
     
-    G = nx.read_edgelist(path,edge_attrs)
+    G = nx.read_edgelist(path,data=((edge_attrs[0],float),(edge_attrs[1], int)))
 
     return G
 
-def save_nx_G_to_edgelist(G, fname, edge_attrs: List = ['count','total']):
+def save_nx_G_to_edgelist(G, fname, edge_attrs: List = ['total','count']):
     '''
     pass a list of arrtibutes name in the graph object
     '''
@@ -91,3 +91,4 @@ def degree_scatter(
 
     plt.tight_layout()
     plt.show()
+    return
