@@ -5,21 +5,34 @@ import seaborn as sns
 import matplotlib.pyplot as plt 
 from collections import Counter 
 from typing import Literal, Union, Optional, List
+import random
 
 
 def get_nx_G_from_edgelist(path,edge_attrs: List = ['total','count']):
     
-    G = nx.read_edgelist(path,data=((edge_attrs[0],float),(edge_attrs[1], int)))
+    G = nx.read_edgelist(path,data=((edge_attrs[0],float),(edge_attrs[1], int)),
+                         create_using=nx.DiGraph)
 
     return G
 
 def save_nx_G_to_edgelist(G, fname, edge_attrs: List = ['total','count']):
-    '''
-    pass a list of arrtibutes name in the graph object
-    '''
+    
     nx.write_edgelist(G, fname, edge_attrs)
     return
 
+def easy_label_from_G(G:nx.graph):
+    """change the nodes id with simple label
+
+    Args:
+        G (nx.graph): _description_
+
+    Returns:
+        a new graph object
+    """    
+    all_nodes = list(G.nodes())
+    mapping ={old_name:new_name for new_name, old_name in enumerate(all_nodes)}
+    new_G = nx.relabel_nodes(G,mapping)
+    return new_G
 
 def get_nx_G_from_df(df, edge_attrs=None, include_edge_attr=False):
     '''
@@ -92,3 +105,47 @@ def degree_scatter(
     plt.tight_layout()
     plt.show()
     return
+
+
+def sugraph_ego_draw(G, steps=1, centernode=None, with_label=False,
+                     alpha = 0.5,
+                     undirected: bool = True
+                     ):
+    """Given a cernter node, draw all it's neighbors within step n
+
+    Args:
+        G (_type_): _description_
+        centernode (_type_): _description_
+    """    
+    if centernode is None:
+        centernode = random.choice(list(G.nodes()))
+    G_sub = nx.ego_graph(G, centernode, steps,undirected=undirected)
+    pos = nx.spring_layout(G_sub)  # You can choose a different layout if needed
+    nx.draw(G_sub, pos, with_labels=with_label, font_weight='bold', 
+            node_size=200, node_color='skyblue', edge_color='gray',
+            alpha=0.5)
+    plt.show()
+    return
+
+def subgraph_random_k(G,selected_nodes, num_initial=1, steps=2):
+    """ choose k nodes and their n-steps neighbors as a subgraph,
+    Notice this algorithm will consider the direction of links
+
+    Args:
+        G (_type_): Graph object
+        selected_nodes (_list_): list of chosen nodes
+        num_initial (_type_): _how many initial nodes to choose_
+        steps (int, optional): steps. Defaults to 2.
+
+    Returns:
+        Subgraph
+    """    
+    
+    if selected_nodes is None:
+        selected_nodes = random.sample(list(G.nodes), num_initial)
+    subgraph_nodes = set(selected_nodes)
+    for node in selected_nodes:
+        subgraph_nodes.update(nx.single_source_shortest_path_length(G, node, cutoff=steps).keys())
+    subgraph = G.subgraph(subgraph_nodes)
+    
+    return subgraph
