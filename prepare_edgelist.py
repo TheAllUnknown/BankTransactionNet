@@ -7,6 +7,7 @@ from collections import Counter
 import torch
 from typing import Literal, Union, Optional, List
 import utils
+### Run this file to clean all data and build a edgelist file for further analysis
 
 def clean_data(df, drop_year = True):
     modified_df = df.groupby(['start_id','end_id'],as_index=False).sum()
@@ -49,13 +50,13 @@ def get_nx_G(df, edge_attrs=None, include_edge_attr=False):
 
     return G
 
-df = pd.read_csv('data/rabobank_data.csv',sep=';') # the data covers transfer before the 2020 
 
+df = pd.read_csv('data/rabobank_data.csv',sep=';') # the data covers transfer before the 2020 
 df  = clean_data(df, drop_year = True)
 mapping = load_node(df)
 edge_index, edge_attr = load_edge(df, 'start_id', mapping, 'end_id', mapping, ['total','count'])
-
-
-
 G  = get_nx_G(df, edge_attrs=['total','count'], include_edge_attr = True) 
-utils.save_nx_G_to_edgelist(G,'data/data.edgelist')
+G = utils.easy_label_from_G(G)
+
+nx.write_edgelist(G, 'data/data_easylabel.edgelist', data=['total','count'])
+G = nx.read_edgelist('data/data_easylabel.edgelist', data=(("total",float),("count", int)), create_using=nx.DiGraph)
