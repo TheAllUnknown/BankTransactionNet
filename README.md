@@ -1,2 +1,2 @@
 # BankTransactionNet
-A project for bank transaction network
+A project for bank transaction anomaly detection. under developing...
