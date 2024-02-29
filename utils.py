@@ -128,7 +128,9 @@ def degree_scatter(
 
 def sugraph_ego_draw(G, steps=1, centernode=None, with_label=False,
                      alpha = 0.5,
-                     undirected: bool = True
+                     undirected: bool = True,
+                     node_size = 100,
+                     **kwargs
                      ):
     """Given a cernter node, draw all it's neighbors within step n
 
@@ -141,12 +143,12 @@ def sugraph_ego_draw(G, steps=1, centernode=None, with_label=False,
     G_sub = nx.ego_graph(G, centernode, steps,undirected=undirected)
     pos = nx.spring_layout(G_sub)  # You can choose a different layout if needed
     nx.draw(G_sub, pos, with_labels=with_label, font_weight='bold', 
-            node_size=200, node_color='skyblue', edge_color='gray',
-            alpha=0.5)
+            node_size=node_size, node_color='skyblue', edge_color='gray',
+            alpha=alpha)
     plt.show()
     return
 
-def subgraph_random_k(G,selected_nodes, num_initial=1, steps=2):
+def subgraph_random_k(G,selected_nodes=None, num_initial=1, steps=2):
     """ choose k nodes and their n-steps neighbors as a subgraph,
     Notice this algorithm will consider the direction of links
 
