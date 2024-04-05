@@ -22,5 +22,5 @@ strong_connected_len_list  = components_distribution(G, type = 'strong')
 np.save('data/strong_connected.npy',strong_connected_len_list)
 # the largest componnet contains 361816 nodes, the second only contains 28, there are 1259991 components
 largest_strong_cc = max(nx.strongly_connected_components(G), key=len)
-G_sub = G.subgraph(largest_cc)
+G_sub = G.subgraph(largest_strong_cc)
 nx.write_edgelist(G_sub,'data/LSCC.edge_list',data=['total','count'])
