@@ -4,3 +4,5 @@ data/data.edgelist
 data/easy_label_G.edgelist
 data/data_easylabel.edgelist
 data/sample.edgelist
+*.edge_list
+*.npy
