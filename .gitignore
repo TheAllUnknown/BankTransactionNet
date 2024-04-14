@@ -6,3 +6,5 @@ data/data_easylabel.edgelist
 data/sample.edgelist
 *.edge_list
 *.npy
+data/LSCC.edgelist
+data/LWCC.edgelist
