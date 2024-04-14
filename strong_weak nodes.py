@@ -69,17 +69,24 @@ def scatter_degree_corr2(G,G2=None,weight=None,if_log =True): # G will be weakly
 
 # person correlation in strong componnet
 #----------------------------------------------------------------------------
-in_degree = [degree for node, degree in strong.in_degree()]
-out_degree = [degree for node, degree in strong.out_degree()]
+weak_nodes = set(weak) - set(strong)
+strong_nodes = set(strong)
+weight ='count' # or None or 'count'
+in_degree_weak= [weak.in_degree(node,weight=weight) for node in weak_nodes]
+out_degree_weak= [weak.out_degree(node,weight=weight) for node in weak_nodes]
+    # Calculate the degrees of nodes in weakly not strongly connected component
+in_degree_strong= [weak.in_degree(node,weight=weight) for node in strong_nodes]
+out_degree_strong= [weak.out_degree(node,weight=weight) for node in strong_nodes]
 
-correlation_coefficient, p_value = spearmanr(in_degree, out_degree)
+
+
+correlation_coefficient, p_value = spearmanr(in_degree_weak, out_degree_weak)
 print("Correlation coefficient:", correlation_coefficient)
 print("P-value:", p_value)
 print('-----------------------------------')
 
 
-in_degree2 = [degree for node, degree in weak.in_degree()]
-out_degree2 = [degree for node, degree in weak.out_degree()]
-correlation_coefficient, p_value = spearmanr(in_degree2, out_degree2)
+
+correlation_coefficient, p_value = spearmanr(in_degree_strong, out_degree_strong)
 print("Correlation coefficient:", correlation_coefficient)
 print("P-value:", p_value)

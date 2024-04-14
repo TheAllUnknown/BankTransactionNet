@@ -67,7 +67,7 @@ def strength_scatter(
     plt.xscale('log',base=10)
     plt.yscale('log',base = 10)
     plt.legend()
-    plt.xlabel('Strength', fontsize=10)
+    plt.xlabel('Strength (Total)', fontsize=10)
     plt.ylabel((r'$P_{>}(s)$'), fontsize=10)
     plt.show()
 
