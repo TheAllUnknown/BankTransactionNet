@@ -68,6 +68,7 @@ def degree_scatter(
     plt.show()
     return
 
-G = nx.read_edgelist('data/data_easylabel.edgelist', data=(("total",float),("count", int)), create_using=nx.DiGraph)
+if __name__ =='__main__':
+    G = nx.read_edgelist('data/data_easylabel.edgelist', data=(("total",float),("count", int)), create_using=nx.DiGraph)
 
-degree_scatter(G,['in','out'],type='percentage',ignore_first_n=5,ignore_last_n=5,log=True)
+    degree_scatter(G,['in','out'],type='percentage',log=True)

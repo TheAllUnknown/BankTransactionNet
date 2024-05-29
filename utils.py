@@ -4,8 +4,29 @@ import networkx as nx
 import seaborn as sns
 import matplotlib.pyplot as plt 
 from collections import Counter 
-from typing import Literal, Union, Optional, List
+from typing import Literal, Union, Optional, List, Tuple
 import random
+import re
+
+def print_basic_properties(G: nx.graph):
+    # Number of nodes
+    num_nodes = G.number_of_nodes()
+    
+    # Number of edges
+    num_edges = G.number_of_edges()
+    
+    # Average degree
+    degrees = [degree for node, degree in G.degree()]
+    avg_degree = sum(degrees) / num_nodes
+    
+    # Average clustering coefficient
+    avg_clustering_coeff = nx.average_clustering(G)
+    
+    # Print properties
+    print("Number of nodes:", num_nodes)
+    print("Number of edges:", num_edges)
+    print("Average degree:", avg_degree)
+    print("Average clustering coefficient:", avg_clustering_coeff)
 
 
 def easy_label_from_G(G:nx.graph):
@@ -39,6 +60,15 @@ def get_nx_G_from_df(df, edge_attrs=None, include_edge_attr=False):
 
 
 def components_distribution(G, type = 'weak'):
+    """_summary_
+
+    Args:
+        G (_type_): nx.graph object
+        type (str, optional): _Defaults to 'weak'.
+
+    Returns:
+        A length list of all components sorted in descending order
+    """    
     if type == 'weak':
         component_len_list = [len(c) for c in sorted(nx.weakly_connected_components(G), key=len, reverse=True)]
     else:
@@ -86,7 +116,7 @@ def degree_scatter(
         G (Union[nx.Graph, nx.DiGraph]): _description_
         type_list (List): ['in','out','total']
         figsize (tuple, optional): _description_. Defaults to (8,12).
-        type (str, optional): _description_. Defaults to 'count' can also be 'precentage'.
+        type (str, optional): _description_. Defaults to 'count' can also be 'precentage'. if 'percentage' the the y-tick would be 
         ignore_first_n (int, optional): _description_. ignore some extreme to make the plot look better
         ignore_last_n (int, optional): _description_. ignore some extreme values to make the plot look better
         log (bool, optional): _description_. log scale to test power law.
@@ -94,10 +124,12 @@ def degree_scatter(
         cumulative (bool, optional): _description_. whether computing the cumulative distribution
     """  
     num_cols = len(type_list)
-    
     fig, axs = plt.subplots(num_cols, 1, figsize = figsize)
+
     for i in range(num_cols):
+
         x,y = count_degree_dist(G, type = type_list[i])
+
         x,y = np.array(x),np.array(y)
         if type == 'percentage':
             y = y/np.sum(y)
@@ -126,28 +158,6 @@ def degree_scatter(
     return
 
 
-def sugraph_ego_draw(G, steps=1, centernode=None, with_label=False,
-                     alpha = 0.5,
-                     undirected: bool = True,
-                     node_size = 100,
-                     **kwargs
-                     ):
-    """Given a cernter node, draw all it's neighbors within step n
-
-    Args:
-        G (_type_): _description_
-        centernode (_type_): _description_
-    """    
-    if centernode is None:
-        centernode = random.choice(list(G.nodes()))
-    G_sub = nx.ego_graph(G, centernode, steps,undirected=undirected)
-    pos = nx.spring_layout(G_sub)  # You can choose a different layout if needed
-    nx.draw(G_sub, pos, with_labels=with_label, font_weight='bold', 
-            node_size=node_size, node_color='skyblue', edge_color='gray',
-            alpha=alpha)
-    plt.show()
-    return
-
 def subgraph_random_k(G,selected_nodes=None, num_initial=1, steps=2):
     """ choose k nodes and their n-steps neighbors as a subgraph,
     Notice this algorithm will consider the direction of links
@@ -170,3 +180,29 @@ def subgraph_random_k(G,selected_nodes=None, num_initial=1, steps=2):
     subgraph = G.subgraph(subgraph_nodes)
     
     return subgraph
+
+
+def strength_scatter(G,weight='total',**kwargs):
+    """plot the cumulative distribution propability of strength
+
+    Args:
+        G (_type_): Digraph
+        weight (str, optional): _description_. Defaults to 'total'.
+    """    
+    in_strength= [G.in_degree(node,weight=weight) for node in G.nodes()]
+    out_strength= [G.out_degree(node,weight=weight) for node in G.nodes()]
+    di = {'in_strength' : in_strength, 'out_strength' : out_strength}
+    colors=['blue','red']
+    plt.figure(**kwargs)
+    for key,value in di.items():
+        sorted_data = np.sort(value)
+        color = colors.pop()
+        cumulative = np.flip(np.arange(len(sorted_data)) / len(sorted_data)) # percentage
+        mark = '.' if re.search('in',key) else '*'
+        plt.scatter(sorted_data,cumulative,c = color,label = key, marker=mark,alpha = 0.3)
+    plt.xscale('log',base=10)
+    plt.yscale('log',base = 10)
+    plt.legend()
+    plt.xlabel('Strength (Total)', fontsize=10)
+    plt.ylabel((r'$P_{>}(s)$'), fontsize=10)
+    plt.show()

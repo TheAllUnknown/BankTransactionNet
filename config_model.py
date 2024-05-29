@@ -9,7 +9,7 @@ import time
 
 
 
-G = nx.read_edgelist('data/data_easylabel.edgelist', 
+G = nx.read_edgelist('data/LWCC.edgelist', 
                      data=(("total",float),("count", int)), create_using=nx.DiGraph)
 print('Read file compelted')
 
