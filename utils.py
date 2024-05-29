@@ -206,3 +206,44 @@ def strength_scatter(G,weight='total',**kwargs):
     plt.xlabel('Strength (Total)', fontsize=10)
     plt.ylabel((r'$P_{>}(s)$'), fontsize=10)
     plt.show()
+
+def degree_vs_avgclustering(G):
+    """
+    Function to plot degree vs clustering coefficient for each node in a directed graph G.
+    The graph is first converted to an undirected graph before calculations.
+    
+    Parameters:
+    G : NetworkX DiGraph
+        A directed graph.
+    """
+    
+    # Convert the directed graph to an undirected graph
+    G_undirected = G.to_undirected()
+
+    # Calculate degree and clustering coefficient for each node
+    degrees = dict(G_undirected.degree())
+    clustering_coeffs = nx.clustering(G_undirected)
+    
+    # Group clustering coefficients by degree
+    degree_clustering = defaultdict(list)
+    for node in G_undirected.nodes():
+        degree = degrees[node]
+        clustering_coeff = clustering_coeffs[node]
+        degree_clustering[degree].append(clustering_coeff)
+    
+    # Calculate average clustering coefficient for each degree
+    avg_clustering_by_degree = {degree: sum(clustering_list) / len(clustering_list) 
+                                for degree, clustering_list in degree_clustering.items()}
+    
+    # Extract degree and average clustering coefficient values
+    degree_values = list(avg_clustering_by_degree.keys())
+    avg_clustering_values = list(avg_clustering_by_degree.values())
+    
+    plt.figure(figsize=(10, 6))
+    plt.scatter(degree_values, avg_clustering_values, alpha=0.6)
+    plt.xscale('log', base=10)  # Log scale for x-axis (degree)
+    plt.yscale('log', base=10)  # Log scale for y-axis (average clustering coefficient)
+    plt.xlabel('Degree', fontsize=12)
+    plt.ylabel('Average Clustering Coefficient', fontsize=12)
+    plt.title('Degree vs Average Clustering Coefficient', fontsize=15)
+    plt.show()
