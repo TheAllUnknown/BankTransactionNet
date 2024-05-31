@@ -4,21 +4,30 @@ import networkx as nx
 import seaborn as sns
 import matplotlib.pyplot as plt 
 from collections import Counter 
-from typing import Literal, Union, Optional, List
+from typing import Literal, Union, Optional, List, Tuple
 import random
+import re
 
-
-def get_nx_G_from_edgelist(path,edge_attrs: List = ['total','count']):
+def print_basic_properties(G: nx.graph):
+    # Number of nodes
+    num_nodes = G.number_of_nodes()
     
-    G = nx.read_edgelist(path,data=((edge_attrs[0],float),(edge_attrs[1], int)),
-                         create_using=nx.DiGraph)
-
-    return G
-
-def save_nx_G_to_edgelist(G, fname, edge_attrs: List = ['total','count']):
+    # Number of edges
+    num_edges = G.number_of_edges()
     
-    nx.write_edgelist(G, fname, edge_attrs)
-    return
+    # Average degree
+    degrees = [degree for node, degree in G.degree()]
+    avg_degree = sum(degrees) / num_nodes
+    
+    # Average clustering coefficient
+    avg_clustering_coeff = nx.average_clustering(G)
+    
+    # Print properties
+    print("Number of nodes:", num_nodes)
+    print("Number of edges:", num_edges)
+    print("Average degree:", avg_degree)
+    print("Average clustering coefficient:", avg_clustering_coeff)
+
 
 def easy_label_from_G(G:nx.graph):
     """change the nodes id with simple label
@@ -51,6 +60,15 @@ def get_nx_G_from_df(df, edge_attrs=None, include_edge_attr=False):
 
 
 def components_distribution(G, type = 'weak'):
+    """_summary_
+
+    Args:
+        G (_type_): nx.graph object
+        type (str, optional): _Defaults to 'weak'.
+
+    Returns:
+        A length list of all components sorted in descending order
+    """    
     if type == 'weak':
         component_len_list = [len(c) for c in sorted(nx.weakly_connected_components(G), key=len, reverse=True)]
     else:
@@ -81,53 +99,66 @@ def count_degree_dist(G, type : Literal ['in', 'out', 'total'] = 'total', order=
 def degree_scatter(
     G: Union[nx.Graph, nx.DiGraph], 
     type_list: List,
-    figsize = (8,12),
+    figsize: tuple = (8,12),
+    type:str = 'count',
     ignore_first_n : int = 0,
     ignore_last_n: int = 0,
+    log = False,
+    reference = False,
+    cumulative = True,
     **kwargs
     ):
-    '''
-    'type_list' must be a list subset to ['in', 'out', 'total'],
-    also set any necessary arguments to tune the style of plot in plt.scatter.
+    """    also set any necessary arguments to tune the style of plot in plt.scatter.
     possibly the result graph won't be nice, so better to drop some degree points,
     do this by setting the 'ignore_first_n' and 'ignore_last_n'
-    '''
-    num_cols = len(type_list)
-    
-    fig, axs = plt.subplots(num_cols, 1, figsize = figsize)
-    for i in range(num_cols):
-        x,y = count_degree_dist(G, type = type_list[i])
-        
 
-        axs[i].scatter(x[ignore_first_n: -ignore_last_n], y[ignore_first_n: -ignore_last_n], **kwargs)
-        axs[i].set_title(f'{type_list[i]}-degree hist')
+    Args:
+        G (Union[nx.Graph, nx.DiGraph]): _description_
+        type_list (List): ['in','out','total']
+        figsize (tuple, optional): _description_. Defaults to (8,12).
+        type (str, optional): _description_. Defaults to 'count' can also be 'precentage'. if 'percentage' the the y-tick would be 
+        ignore_first_n (int, optional): _description_. ignore some extreme to make the plot look better
+        ignore_last_n (int, optional): _description_. ignore some extreme values to make the plot look better
+        log (bool, optional): _description_. log scale to test power law.
+        reference (bool, optional): _description_. whether add a reference line.
+        cumulative (bool, optional): _description_. whether computing the cumulative distribution
+    """  
+    num_cols = len(type_list)
+    fig, axs = plt.subplots(num_cols, 1, figsize = figsize)
+
+    for i in range(num_cols):
+
+        x,y = count_degree_dist(G, type = type_list[i])
+
+        x,y = np.array(x),np.array(y)
+        if type == 'percentage':
+            y = y/np.sum(y)
+
+        if cumulative:
+            y = np.cumsum(y[::-1])[::-1] # plot for P(k>=K)
+
+        if log == True:
+            x[x==0] = 0.1
+
+            if ignore_last_n == 0:
+                axs[i].scatter(x[ignore_first_n:], y[ignore_first_n:], **kwargs)
+            else:
+                axs[i].scatter(x[ignore_first_n: -ignore_last_n], y[ignore_first_n: -ignore_last_n], **kwargs)
+            
+            axs[i].set_xscale('log', base=10)
+            axs[i].set_yscale('log', base=10)
+            axs[i].set_title(f'{type_list[i]}-degree hist')
+
+        else:
+            axs[i].scatter(x[ignore_first_n: -ignore_last_n], y[ignore_first_n: -ignore_last_n], **kwargs)
+            axs[i].set_title(f'{type_list[i]}-degree hist')
 
     plt.tight_layout()
     plt.show()
     return
 
 
-def sugraph_ego_draw(G, steps=1, centernode=None, with_label=False,
-                     alpha = 0.5,
-                     undirected: bool = True
-                     ):
-    """Given a cernter node, draw all it's neighbors within step n
-
-    Args:
-        G (_type_): _description_
-        centernode (_type_): _description_
-    """    
-    if centernode is None:
-        centernode = random.choice(list(G.nodes()))
-    G_sub = nx.ego_graph(G, centernode, steps,undirected=undirected)
-    pos = nx.spring_layout(G_sub)  # You can choose a different layout if needed
-    nx.draw(G_sub, pos, with_labels=with_label, font_weight='bold', 
-            node_size=200, node_color='skyblue', edge_color='gray',
-            alpha=0.5)
-    plt.show()
-    return
-
-def subgraph_random_k(G,selected_nodes, num_initial=1, steps=2):
+def subgraph_random_k(G,selected_nodes=None, num_initial=1, steps=2):
     """ choose k nodes and their n-steps neighbors as a subgraph,
     Notice this algorithm will consider the direction of links
 
@@ -149,3 +180,70 @@ def subgraph_random_k(G,selected_nodes, num_initial=1, steps=2):
     subgraph = G.subgraph(subgraph_nodes)
     
     return subgraph
+
+
+def strength_scatter(G,weight='total',**kwargs):
+    """plot the cumulative distribution propability of strength
+
+    Args:
+        G (_type_): Digraph
+        weight (str, optional): _description_. Defaults to 'total'.
+    """    
+    in_strength= [G.in_degree(node,weight=weight) for node in G.nodes()]
+    out_strength= [G.out_degree(node,weight=weight) for node in G.nodes()]
+    di = {'in_strength' : in_strength, 'out_strength' : out_strength}
+    colors=['blue','red']
+    plt.figure(**kwargs)
+    for key,value in di.items():
+        sorted_data = np.sort(value)
+        color = colors.pop()
+        cumulative = np.flip(np.arange(len(sorted_data)) / len(sorted_data)) # percentage
+        mark = '.' if re.search('in',key) else '*'
+        plt.scatter(sorted_data,cumulative,c = color,label = key, marker=mark,alpha = 0.3)
+    plt.xscale('log',base=10)
+    plt.yscale('log',base = 10)
+    plt.legend()
+    plt.xlabel('Strength (Total)', fontsize=10)
+    plt.ylabel((r'$P_{>}(s)$'), fontsize=10)
+    plt.show()
+
+def degree_vs_avgclustering(G):
+    """
+    Function to plot degree vs clustering coefficient for each node in a directed graph G.
+    The graph is first converted to an undirected graph before calculations.
+    
+    Parameters:
+    G : NetworkX DiGraph
+        A directed graph.
+    """
+    
+    # Convert the directed graph to an undirected graph
+    G_undirected = G.to_undirected()
+
+    # Calculate degree and clustering coefficient for each node
+    degrees = dict(G_undirected.degree())
+    clustering_coeffs = nx.clustering(G_undirected)
+    
+    # Group clustering coefficients by degree
+    degree_clustering = defaultdict(list)
+    for node in G_undirected.nodes():
+        degree = degrees[node]
+        clustering_coeff = clustering_coeffs[node]
+        degree_clustering[degree].append(clustering_coeff)
+    
+    # Calculate average clustering coefficient for each degree
+    avg_clustering_by_degree = {degree: sum(clustering_list) / len(clustering_list) 
+                                for degree, clustering_list in degree_clustering.items()}
+    
+    # Extract degree and average clustering coefficient values
+    degree_values = list(avg_clustering_by_degree.keys())
+    avg_clustering_values = list(avg_clustering_by_degree.values())
+    
+    plt.figure(figsize=(10, 6))
+    plt.scatter(degree_values, avg_clustering_values, alpha=0.6)
+    plt.xscale('log', base=10)  # Log scale for x-axis (degree)
+    plt.yscale('log', base=10)  # Log scale for y-axis (average clustering coefficient)
+    plt.xlabel('Degree', fontsize=12)
+    plt.ylabel('Average Clustering Coefficient', fontsize=12)
+    plt.title('Degree vs Average Clustering Coefficient', fontsize=15)
+    plt.show()

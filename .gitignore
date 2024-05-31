@@ -2,3 +2,17 @@
 data/rabobank_data.csv
 data/data.edgelist
 data/easy_label_G.edgelist
+data/data_easylabel.edgelist
+data/sample.edgelist
+*.edge_list
+*.npy
+data/LSCC.edgelist
+data/LWCC.edgelist
+data/LSCC.csv
+data/LWCC.csv
+data/RW1Node_sample5.3K.csv
+data/RW1Node_sample5.3K.edgelist
+data/RW1Node_sample160000K.csv
+data/RW1Node_sample160000K.edgelist
+data/LWCC_sequential.edgelist
+Graph_Sampling/
