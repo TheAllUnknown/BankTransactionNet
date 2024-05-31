@@ -14,7 +14,5 @@ data/RW1Node_sample5.3K.csv
 data/RW1Node_sample5.3K.edgelist
 data/RW1Node_sample160000K.csv
 data/RW1Node_sample160000K.edgelist
-data/RWMult_sample5.3K.csv
-data/RWMult_sample5.3K.edgelist
 data/LWCC_sequential.edgelist
 Graph_Sampling/
