@@ -147,11 +147,11 @@ def degree_scatter(
             
             axs[i].set_xscale('log', base=10)
             axs[i].set_yscale('log', base=10)
-            axs[i].set_title(f'{type_list[i]}-degree hist')
+            axs[i].set_title(f'{type_list[i]}-degree')
 
         else:
             axs[i].scatter(x[ignore_first_n: -ignore_last_n], y[ignore_first_n: -ignore_last_n], **kwargs)
-            axs[i].set_title(f'{type_list[i]}-degree hist')
+            axs[i].set_title(f'{type_list[i]}-degree')
 
     plt.tight_layout()
     plt.show()
