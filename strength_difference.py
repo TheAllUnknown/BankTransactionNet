@@ -7,6 +7,13 @@ from typing import Literal, Union, Optional, List,Tuple
 import pingouin as pg
 from scipy.stats import ttest_ind,ttest_rel
 import re
+
+'''
+This file is to draw strength scatter plot on LSCC and LWCC
+
+'''
+
+
 strong = nx.read_edgelist('E:/BankTransactionNet/data/LSCC.edgelist', data=(("total",float),("count", int)), create_using=nx.DiGraph)
 weak = nx.read_edgelist('E:/BankTransactionNet/data/LWCC.edgelist', data=(("total",float),("count", int)), create_using=nx.DiGraph)
 
