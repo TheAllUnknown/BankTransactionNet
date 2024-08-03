@@ -8,7 +8,7 @@ from typing import Literal, Union, Optional, List, Tuple
 import random
 import re
 
-def print_basic_properties(G: nx.graph):
+def print_basic_properties(G):
     # Number of nodes
     num_nodes = G.number_of_nodes()
     
@@ -148,7 +148,7 @@ def degree_scatter(
             axs[i].set_xscale('log', base=10)
             axs[i].set_yscale('log', base=10)
             axs[i].set_title(f'{type_list[i]}-degree')
-
+            axs[i].set_ylabel((r'$P_{>}(s)$'), fontsize=10)
         else:
             axs[i].scatter(x[ignore_first_n: -ignore_last_n], y[ignore_first_n: -ignore_last_n], **kwargs)
             axs[i].set_title(f'{type_list[i]}-degree')
