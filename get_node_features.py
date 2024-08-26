@@ -52,15 +52,15 @@ def get_features(G):
 
 
 
-# file_path = 'data/Rabo_node_features.csv'
-# if os.path.exists(file_path):
-#     # Read the file
-#     node_feature_df = pd.read_csv(file_path)
+file_path = 'data/Rabo_node_features.csv'
+if os.path.exists(file_path):
+    # Read the file
+    node_feature_df = pd.read_csv(file_path)
     
-# else:
+else:
     
-#     node_feature_df = get_features(libra_G)
-#     node_feature_df = node_feature_df.reset_index(names='Id')
-#     node_feature_df.to_csv(file_path, index=False)
+    node_feature_df = get_features(libra_G)
+    node_feature_df = node_feature_df.reset_index(names='Id')
+    node_feature_df.to_csv(file_path, index=False)
 
 
