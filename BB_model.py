@@ -10,7 +10,7 @@ def fitness_model(N, m, fitness_dist):
     
     Parameters:
     - N: Total number of nodes
-    - m: Number of edges added per new node
+    - m: Number of intial nodes
     - fitness_dist: A function that generates fitness values
     
     Returns:
@@ -22,7 +22,6 @@ def fitness_model(N, m, fitness_dist):
     # Add nodes one by one
     for new_node in range(m, N):
         G.add_node(new_node)
-        
         # Assign a fitness value to the new node
         fitness[new_node] = fitness_dist()
         
@@ -38,8 +37,9 @@ def fitness_model(N, m, fitness_dist):
         attachment_probs = np.array(attachment_probs)
         attachment_probs = attachment_probs / attachment_probs.sum()
         
-        # Choose m nodes to attach to based on the attachment probabilities
-        targets = np.random.choice(G.nodes, size=m, replace=False, p=attachment_probs)
+        k  = random.randint(1,2)
+        # Choose k nodes to attach to based on the attachment probabilities
+        targets = np.random.choice(G.nodes, size=k, replace=False, p=attachment_probs)
         
         # Add edges from the new node to the chosen targets
         for target in targets:
@@ -56,10 +56,10 @@ def fitness_dist():
 
 if __name__=='__main__':
 # Example usage
-    file_path = 'data/LWCC.csv'
-    G = fitness_model(10000,3,fitness_dist)
+
+    G = fitness_model(50000,3,fitness_dist)
     degrees = [G.degree(n) for n in G.nodes()]
     fit_powerlaw(degrees)
 
-    density,avg_clustering_coef,correlation = graph_analysis(G,1000)
+    density,avg_clustering_coef,correlation = graph_analysis(G,50000)
     print(f'density:{density}\navg_clustering{avg_clustering_coef}\ncorrelation:{correlation}')

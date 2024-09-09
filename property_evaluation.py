@@ -2,8 +2,9 @@ import networkx as nx
 import random
 import numpy as np
 from scipy.stats import pearsonr
+from power_law_fit import read_edgelist_from_csv
 
-def graph_analysis(G, num_samples=1000):
+def graph_analysis(G, num_samples=5000):
     """
     Returns the density, mean clustering coefficient, and clustering vs. degree correlation for an undirected graph G.
     
@@ -12,14 +13,13 @@ def graph_analysis(G, num_samples=1000):
     - num_samples: The number of random samples to use for calculating clustering coefficient and correlation.
     
     Returns:
-    - density: The density of the graph.
+    - average degree
     - mean_clustering: The mean clustering coefficient (sampled from num_samples nodes).
     - clustering_degree_corr: Pearson correlation between degree and clustering coefficient (sampled from num_samples nodes).
     """
     
-    # 1. Graph Density
-    density = nx.density(G)
     
+    average_degree = sum(dict(G.degree()).values()) / len(G.nodes())
     # 2. Random Sampling of Nodes
     nodes = list(G.nodes)
     sampled_nodes = random.sample(nodes, min(num_samples, len(nodes)))  # Sample up to num_samples nodes
@@ -41,4 +41,13 @@ def graph_analysis(G, num_samples=1000):
     else:
         clustering_degree_corr = None  # Return None if correlation can't be computed
     
-    return density, mean_clustering, clustering_degree_corr
+    return average_degree, mean_clustering, clustering_degree_corr
+
+if __name__=='__main__':
+    file_path = 'data/rabobank_easylabel.csv'
+    G = read_edgelist_from_csv(file_path)
+    degrees = [G.degree(n) for n in G.nodes()]
+    max_value = float('inf')
+    average_degree,avg_clustering_coef,correlation = graph_analysis(G,max_value)
+    print(f'degree mean:{average_degree}\navg_clustering{avg_clustering_coef}\ncorrelation:{correlation}')
+

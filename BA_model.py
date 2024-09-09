@@ -23,8 +23,9 @@ def generate_ba_model_with_exponential_edges(n,initial_graph_size=5, scale=0.8):
     
     for new_node in range(initial_graph_size, n):
         # Sample the number of edges to add from an exponential distribution (rounded)
-        num_edges = 1 #max(1, int(np.random.exponential(scale=scale)))
-        
+        num_edges = random.randint(1, 2) #max(1, int(np.random.exponential(scale=scale)))
+
+        # with the add of new node, each create 2*num_edges degress 
         # Get the degrees of existing nodes
         degrees = np.array([G.degree(n) for n in G.nodes()])
         total_degree = np.sum(degrees)
@@ -39,7 +40,7 @@ def generate_ba_model_with_exponential_edges(n,initial_graph_size=5, scale=0.8):
                 target = np.random.choice(list(G.nodes()), p=probabilities)
             if target not in targets:
                 targets.add(target)
-    
+        G.add_edges_from((new_node, target) for target in targets)
     return G
 
 
@@ -56,7 +57,6 @@ def nonlinear_preferential_attachment(n, m, beta=1):
 
     return G
 
-    
 
 
 # Example usage
@@ -64,5 +64,5 @@ G = generate_ba_model_with_exponential_edges(10000,3)
 degrees = [G.degree(n) for n in G.nodes()]
 fit_powerlaw(degrees)
 
-density,avg_clustering_coef,correlation = graph_analysis(G,1000)
-print(f'density:{density}\navg_clustering{avg_clustering_coef}\ncorrelation:{correlation}')
+avg_degree,avg_clustering_coef,correlation = graph_analysis(G,10000)
+print(f'density:{avg_degree}\navg_clustering:{avg_clustering_coef}\ncorrelation:{correlation}')
