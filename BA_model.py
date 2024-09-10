@@ -3,9 +3,9 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from property_evaluation import graph_analysis
-from power_law_fit import fit_powerlaw
+from power_law_fit import fit_powerlaw,plot_degree_distribution
 
-def generate_ba_model_with_exponential_edges(n,initial_graph_size=5, scale=0.8):
+def generate_ba_model(n,initial_graph_size=5):
     """
     Generates a Barabási–Albert model network where the number of edges added for each new node
     follows an exponential distribution.
@@ -48,11 +48,13 @@ def nonlinear_preferential_attachment(n, m, beta=1):
     G = nx.complete_graph(m)  # Start with m fully connected nodes
 
     for new_node in range(m, n):
+        k = random.randint(1, 2)
+
         degrees = np.array([G.degree(node) for node in G.nodes()])
         total_degree = np.sum(degrees ** beta)  # Use nonlinear attachment
         probabilities = (degrees ** beta) / total_degree
 
-        targets = np.random.choice(G.nodes(), size=m, p=probabilities, replace=False)
+        targets = np.random.choice(G.nodes(), size=k, p=probabilities, replace=False)
         G.add_edges_from((new_node, target) for target in targets)
 
     return G
@@ -60,9 +62,9 @@ def nonlinear_preferential_attachment(n, m, beta=1):
 
 
 # Example usage
-G = generate_ba_model_with_exponential_edges(10000,3)
-degrees = [G.degree(n) for n in G.nodes()]
+G = nonlinear_preferential_attachment(30000,2,beta=1.2)
+degrees = plot_degree_distribution(G)
 fit_powerlaw(degrees)
 
 avg_degree,avg_clustering_coef,correlation = graph_analysis(G,10000)
-print(f'density:{avg_degree}\navg_clustering:{avg_clustering_coef}\ncorrelation:{correlation}')
+print(f'degree:{avg_degree}\navg_clustering:{avg_clustering_coef}\ncorrelation:{correlation}')

@@ -5,6 +5,7 @@ import powerlaw
 from scipy.stats import pearsonr
 import random
 import numpy as np
+from collections import Counter
 # Step 1: Read the edge list from a CSV file
 # Make sure the CSV has columns representing edges, e.g., "source" and "target"
 def read_edgelist_from_csv(file_path):
@@ -16,12 +17,27 @@ def read_edgelist_from_csv(file_path):
 
 # Step 2: Compute the degree distribution and plot it
 def plot_degree_distribution(G):
-    degrees = [G.degree(n) for n in G.nodes()]
-    plt.hist(degrees, bins=30, alpha=0.75, color='b')
-    plt.title('Degree Distribution')
+    degrees = [degree for node, degree in G.degree()]
+
+    # Calculate the degree distribution
+    degree_count = Counter(degrees)
+    deg, count = zip(*degree_count.items())
+    deg, count = np.array(deg), np.array(count)
+
+    # Plot the degree distribution
+    plt.figure(figsize=(10, 6))
+    plt.scatter(deg, count, color='blue', label='Degree Distribution', alpha=0.7)
+    plt.xscale('log')  # Log scale for x-axis
+    plt.yscale('log')  # Log scale for y-axis
     plt.xlabel('Degree')
     plt.ylabel('Frequency')
+    plt.title('Degree Distribution of the Network')
+    plt.legend()
+    plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+
+    # Show the plot
     plt.show()
+
     return degrees
 
 # Step 3: Fit the degree distribution to a power-law and check
@@ -63,9 +79,7 @@ def degree_clustering_correlation(G, sample_size=1000):
         The average clustering coefficient of the entire network.
     """
     
-    # Ensure sample size does not exceed the total number of nodes
     num_nodes = min(len(G.nodes()), sample_size)
-    
     # Sample nodes randomly
     sampled_nodes = random.sample(G.nodes(), num_nodes)
     
@@ -83,13 +97,13 @@ def degree_clustering_correlation(G, sample_size=1000):
 
 if __name__=='__main__':
 # Example usage
-    file_path = 'data/LWCC.csv'
+    file_path = 'data/Libra.csv'
     G = read_edgelist_from_csv(file_path)
     degrees = plot_degree_distribution(G)
     degrees = np.array(degrees)
-    degrees = degrees[degrees<=100]
+    degrees = degrees
     fit_powerlaw(degrees)
 
-    correlation, avg_clustering = degree_clustering_correlation(G)
-    print(f"Degree-Clustering Coefficient Correlation: {correlation}")
-    print(f"Average Clustering Coefficient: {avg_clustering}")
+    # correlation, avg_clustering = degree_clustering_correlation(G)
+    # print(f"Degree-Clustering Coefficient Correlation: {correlation}")
+    # print(f"Average Clustering Coefficient: {avg_clustering}")

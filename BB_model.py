@@ -51,15 +51,15 @@ def fitness_model(N, m, fitness_dist):
 
 # Example of a fitness distribution function (uniform fitness in range [0.5, 1.5])
 def fitness_dist():
-    return random.uniform(0.5, 1.5)
-
+    return np.random.uniform(0,1)
+# np.random.exponential(1/3)
 
 if __name__=='__main__':
 # Example usage
 
-    G = fitness_model(50000,3,fitness_dist)
+    G = fitness_model(10000,2,fitness_dist)
     degrees = [G.degree(n) for n in G.nodes()]
     fit_powerlaw(degrees)
 
-    density,avg_clustering_coef,correlation = graph_analysis(G,50000)
-    print(f'density:{density}\navg_clustering{avg_clustering_coef}\ncorrelation:{correlation}')
+    density,avg_clustering_coef,correlation = graph_analysis(G,10000)
+    print(f'degree:{density}\navg_clustering{avg_clustering_coef}\ncorrelation:{correlation}')
