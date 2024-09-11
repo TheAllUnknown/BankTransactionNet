@@ -3,7 +3,7 @@ import random
 from scipy.stats import pearsonr,spearmanr
 import pandas as pd
 
-libra_df = pd.read_csv('data/Libra.csv')
+libra_df = pd.read_csv('data/rabobank_easylabel.csv')
 G = nx.from_pandas_edgelist(libra_df,source = 'Source', target = 'Target', 
                                   edge_attr=True, create_using=nx.DiGraph)
 
@@ -65,7 +65,10 @@ node_weight_samples, neighbor_weight_samples = sample_node_weight_pairs(undirect
 correlation, p_value = spearmanr(node_weight_samples, neighbor_weight_samples)
 df = pd.DataFrame({'node_weight': node_weight_samples,'avg_neighbor_weight':neighbor_weight_samples})
 # Output the results
-print(f"Pearson correlation coefficient: {correlation}")
+print(f"spearman correlation coefficient: {correlation}")
 print(f"P-value: {p_value}")
 
+correlation, p_value = pearsonr(node_weight_samples, neighbor_weight_samples)
+print(f"Pearson correlation coefficient: {correlation}")
+print(f"P-value: {p_value}")
 #-0.02 paerson libra,-0.008

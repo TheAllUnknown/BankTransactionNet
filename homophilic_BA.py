@@ -54,7 +54,7 @@ def attach_node(G, new_node, new_node_attr, degree_beta, beta):
         G.add_edge(new_node, v)
 
 # Scale-Free Homophilic Model
-def scale_free_homophilic_model(N, m, beta):
+def scale_free_homophilic_model(N, m,degree_beta, beta):
     """
     Generates a scale-free network with homophily.
     N: Total number of nodes
@@ -62,19 +62,19 @@ def scale_free_homophilic_model(N, m, beta):
     beta: Homophily strength parameter (larger beta means stronger homophily)
     """
     # Initialize a small graph with m+1 nodes, fully connected
-    G = nx.complete_graph(m + 1)
+    G = nx.complete_graph(m)
     
     # Assign random attributes (in range [0,1]) to the initial nodes
     attributes = {i: sample_point_in_triangle((0,0), (0,1), (1/2,1)) for i in G.nodes()}
     nx.set_node_attributes(G, attributes, 'attr')
     
     # Add new nodes to the graph
-    for new_node in range(m + 1, N):
+    for new_node in range(m, N):
         new_node_attr =  sample_point_in_triangle((0,0), (0,1), (1/2,1))  # Assign a random attribute to the new node
         G.add_node(new_node, attr=new_node_attr)
         
         # Attach the new node to m existing nodes, considering homophily
-        attach_node(G, new_node, new_node_attr, m, beta)
+        attach_node(G, new_node, new_node_attr, degree_beta, beta)
     
     return G
 def generate_attr():
@@ -107,9 +107,10 @@ def sample_point_in_triangle(v1, v2, v3):
 if __name__=='__main__':
 # Example usage
 
-    G = scale_free_homophilic_model(30000,2,1)
+    G = scale_free_homophilic_model(30000,2,degree_beta=1,beta=1)
     degrees = plot_degree_distribution(G)
     fit_powerlaw(degrees)
 
     density,avg_clustering_coef,correlation = graph_analysis(G,10000)
     print(f'degree:{density}\navg_clustering{avg_clustering_coef}\ncorrelation:{correlation}')
+    nx.write_graphml(G, "homophilic_model_linear.graphml")
