@@ -8,16 +8,24 @@ import numpy as np
 from collections import Counter
 # Step 1: Read the edge list from a CSV file
 # Make sure the CSV has columns representing edges, e.g., "source" and "target"
-def read_edgelist_from_csv(file_path):
+def read_edgelist_from_csv(file_path,create_using='undirected'):
     df = pd.read_csv(file_path)
     edges = list(zip(df['Source'], df['Target']))
-    G = nx.Graph()
+    if create_using=='undirected':
+        G = nx.Graph()
+    else:
+        G = nx.DiGraph()
     G.add_edges_from(edges)
     return G
 
 # Step 2: Compute the degree distribution and plot it
-def plot_degree_distribution(G):
-    degrees = [degree for node, degree in G.degree()]
+def plot_degree_distribution(G,directed=False ):
+    if not directed:
+        degrees = [degree for node, degree in G.degree()]
+    else:
+        total_degree = {node: G.in_degree(node) + G.out_degree(node) for node in G.nodes()}
+        # If you want a list of total degrees only
+        degrees = list(total_degree.values())
 
     # Calculate the degree distribution
     degree_count = Counter(degrees)

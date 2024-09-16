@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 from property_evaluation import graph_analysis
 from power_law_fit import fit_powerlaw
 from power_law_fit import plot_degree_distribution
+from collections import Counter
 # Homophily function (exponential)
-def homophily(u_attr, v_attr, beta):
+def distance(u_attr, v_attr, beta):
     """
     Calculate homophily based on attributes u_attr and v_attr.
     The higher the homophily, the more similar the nodes are.
@@ -24,7 +25,7 @@ def attach_node(G, new_node, new_node_attr, degree_beta, beta):
     G: The graph
     new_node: The new node to attach
     new_node_attr: The attribute of the new node
-    m: Number of edges to attach
+    degree_beta: preferential attachment for degree
     beta: Homophily strength parameter
     """
     # Get a list of existing nodes and their attributes
@@ -33,12 +34,15 @@ def attach_node(G, new_node, new_node_attr, degree_beta, beta):
     
     # Calculate attachment probabilities based on degree and homophily
     attachment_probs = []
+
+    max_distance = np.sqrt(5)/2 # REMENBER TO EDIT THIS EVERYTIME WHEN CHANGE THE TRAINGLE
+
     for v in existing_nodes:
         v_attr = existing_attrs[v]
         degree = G.degree(v) # can also try to add non-linear preferential
-        h = homophily(new_node_attr, v_attr, beta)  # Homophily factor
-
-        attachment_prob = degree ** degree_beta * h # non linear
+        h = distance(new_node_attr, v_attr, beta)  # Homophily factor
+        # 1-h/max_distance
+        attachment_prob = degree ** degree_beta * (1-h/max_distance) # non linear
         attachment_probs.append(attachment_prob)
     
     # Normalize the probabilities
@@ -46,7 +50,7 @@ def attach_node(G, new_node, new_node_attr, degree_beta, beta):
     attachment_probs = [p / total_prob for p in attachment_probs]
     
     # Select m nodes to attach to, based on the probabilities
-    k = random.randint(1,2)
+    k = np.random.randint(1,3) # random number 1 or 2,
     chosen_nodes = np.random.choice(existing_nodes, size=k, p=attachment_probs, replace=False)
     
     # Attach the new node to the chosen nodes
@@ -65,12 +69,12 @@ def scale_free_homophilic_model(N, m,degree_beta, beta):
     G = nx.complete_graph(m)
     
     # Assign random attributes (in range [0,1]) to the initial nodes
-    attributes = {i: sample_point_in_triangle((0,0), (0,1), (1/2,1)) for i in G.nodes()}
+    attributes = {i: sample_point_in_triangle((0,0), (1,0), (1/2,1)) for i in G.nodes()}
     nx.set_node_attributes(G, attributes, 'attr')
     
     # Add new nodes to the graph
     for new_node in range(m, N):
-        new_node_attr =  sample_point_in_triangle((0,0), (0,1), (1/2,1))  # Assign a random attribute to the new node
+        new_node_attr =  sample_point_in_triangle((0,0), (1,0), (1/2,1))  # Assign a random attribute to the new node
         G.add_node(new_node, attr=new_node_attr)
         
         # Attach the new node to m existing nodes, considering homophily
@@ -107,10 +111,41 @@ def sample_point_in_triangle(v1, v2, v3):
 if __name__=='__main__':
 # Example usage
 
-    G = scale_free_homophilic_model(30000,2,degree_beta=1,beta=1)
+    G = scale_free_homophilic_model(30000,2,degree_beta=1,beta=1) # increase the degree beta abit like 1.1 can reduce the power,
+
     degrees = plot_degree_distribution(G)
     fit_powerlaw(degrees)
 
     density,avg_clustering_coef,correlation = graph_analysis(G,10000)
     print(f'degree:{density}\navg_clustering{avg_clustering_coef}\ncorrelation:{correlation}')
-    nx.write_graphml(G, "homophilic_model_linear.graphml")
+    for node, data in G.nodes(data=True):
+        if 'attr' in data:
+            x, y = data['attr']
+            # Add separate attributes for x and y
+            G.nodes[node]['x'] = x
+            G.nodes[node]['y'] = y
+            # Optionally remove the original 'attr'
+            del G.nodes[node]['attr']
+
+
+    nx.write_graphml(G, "data/homophilic_model_linear.graphml")
+
+
+    G_directed = nx.DiGraph()
+    for u, v in G.edges():
+        if random.random() < 0.5:
+            G_directed.add_edge(u, v)
+        else:
+            G_directed.add_edge(v, u)
+
+    # Calculate the total degree for each node
+    total_nodes = G.number_of_nodes()
+    total_degrees = [G_directed.in_degree(n) + G_directed.out_degree(n) for n in G_directed.nodes()]
+    degree_count = Counter(total_degrees)
+    degree_proportions = {degree: count / total_nodes for degree, count in degree_count.items()}
+
+    # Print the proportions for each total degree
+    print(f"Total Degree 1: {degree_proportions[1]}")
+    print(f"Total Degree 2: {degree_proportions[2]}")
+    print(f"Total Degree 3: {degree_proportions[3]}")
+    print(f"Total Degree 50: {degree_proportions[50]}")

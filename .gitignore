@@ -17,3 +17,6 @@ data/RW1Node_sample160000K.edgelist
 data/LWCC_sequential.edgelist
 Graph_Sampling/
 *.edgelist
+data/subgraph_data/rabo8.csv
+data/subgraph_data/Libra10.csv
+/data/subgraph_data
