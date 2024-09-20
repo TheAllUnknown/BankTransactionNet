@@ -13,8 +13,6 @@ our model:
  ,the mu for libra is7.36 and sigma is 2
  the mu for rabo is 7.61 and sigma is 2.6
 
+the random walk sampled graph is also the same
 
 
-# what we can do here
-1.  first 3 dergee distribution 
-2. avg -degree

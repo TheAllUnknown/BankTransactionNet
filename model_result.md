@@ -10,6 +10,12 @@ standard:
     clustering: 0.019
     correlation: -0.0031
 
+configuration:
+libra:
+degree mean:2.872905738769151
+avg_clustering0.013153776889899601
+correlation:0.010466129995627606
+
 we choose 10000 nodes as a network size
 - BA Linear preferential, (1,2) degree
     power: 3.12
@@ -20,6 +26,22 @@ we choose 10000 nodes as a network size
     power:2.9
     avg_clustering: 0.005
     cor -0.003
+- beta = 0.9
+  - 3.25825631158727
+  - 0.0007
+  - -0.0007
+- beta = 0.8
+  - 2.9
+  - 0.0003
+  - -0.0008
+- beta = 0.6
+  - 5 fit well
+  - 0
+  - 0.1
+- beta = 1.2
+  - 2.5 doesn't fit well
+  - 0.05
+  - -0.003
 
 - BB: linear preferential, (1,2) degree
     power: 2.67
