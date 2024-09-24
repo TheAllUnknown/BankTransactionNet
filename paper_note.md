@@ -1,0 +1,10 @@
+- connection in the second graph, before introduing reddit
+- blue one: can add prior study about the unique findings only eisted in hillary&Trump interaction, or populist study, fandom study
+- CSW conference end of Oct
+- provide more justification to call them supporters, or just use more explanination to call them this way
+- share the toxicity labeled data # urgent
+- no outline
+- 'intorduction to Data' to 'data'
+- cite pushshift api
+- cite configuration model
+- 
