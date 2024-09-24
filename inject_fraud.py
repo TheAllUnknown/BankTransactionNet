@@ -12,7 +12,7 @@ import os
 import scipy.stats as stats
 
 
-file_path = 'data/subgraph_data/rabo1.csv'
+file_path = 'data/subgraph_data/Libra1.csv'
 df = pd.read_csv(file_path)
 
 G = nx.from_pandas_edgelist(df,source = 'source', target = 'target', 
@@ -31,6 +31,7 @@ for u, v in G.edges():
     # Draw x from log-normal distribution
     x = np.random.lognormal(mean=log_mean, sigma=log_std)
     G.edges[u, v]['total'] = x
+    G.edges[u, v]['label'] = 0
 
 def add_fraud_edge(G,u,v):
     '''add fraud edge with label and total attibutes'''
@@ -43,7 +44,7 @@ def add_fraud_edge(G,u,v):
 
 
 # def a function to inject heavy path
-def inject_path(G, num_of_anomalies,range_of_nodes=[4,8]):
+def inject_path(G, num_of_anomalies=4,range_of_nodes=[4,8]):
     '''The G will be modfied inplace, this funtion also returns the path of anomaly'''
 
 
@@ -179,7 +180,8 @@ def inject_clqiues(G, random_num=2, directed_num = 3,random_nodes_num=[5,8],dire
 
             add_fraud_edge(G, sender, node)
             edges.append((sender, node))
-
+            
+        add_fraud_edge(G, sender, receiver)
         edges_list.append(edges)
 
     return edges_list
@@ -209,6 +211,7 @@ def custom_watts_strogatz(node_list, k_range, p):
 
     return G
 
+
 def inject_cycles(G,cycle_num=2,nodes_num=[6,10]):
     edges_list = []
 
@@ -217,7 +220,7 @@ def inject_cycles(G,cycle_num=2,nodes_num=[6,10]):
         n = np.random.choice( np.arange(nodes_num[0], nodes_num[1]+1) ) # select random number of nodes
 
         nodes = random.sample(list(G.nodes()), n)
-        random.shuffle(nodes)
+        nodes.sort()
 
         for node in nodes:
             G.nodes[node]['label'] += 1
@@ -253,12 +256,10 @@ def inject_cycles(G,cycle_num=2,nodes_num=[6,10]):
             else:
                 add_fraud_edge(G,v,u)
                 edges.append((v,u))
-        
+
         edges_list.append(edges)
         
     return edges_list
-
-
 
 
 def add_anomalous_edge_weight(G, anomalous_weight = [5000,100000]):
@@ -273,4 +274,10 @@ def add_anomalous_edge_weight(G, anomalous_weight = [5000,100000]):
         # Assign the list of random values to a new attribute called 'random_values'
         G.edges[u, v]['total'] += fraud_amount
 
-
+if __name__=='__main__':
+    inject_path(G,num_of_anomalies=4)
+    inject_clqiues(G)
+    inject_cycles(G)
+    inject_stars(G)
+    add_anomalous_edge_weight(G)
+    nx.write_graphml(G, "data/test_graph.graphml")
