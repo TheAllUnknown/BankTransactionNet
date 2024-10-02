@@ -247,3 +247,13 @@ def degree_vs_avgclustering(G):
     plt.ylabel('Average Clustering Coefficient', fontsize=12)
     plt.title('Degree vs Average Clustering Coefficient', fontsize=15)
     plt.show()
+
+
+def get_edges_with_node(graph, node_id):
+    # Get all edges in the graph
+    all_edges = graph.edges(data=True)
+    
+    # Filter edges that involve the given node ID
+    edges_with_node = [edge for edge in all_edges if node_id in edge[:2]]
+    
+    return edges_with_node

@@ -1,15 +1,9 @@
 import networkx as nx
-import matplotlib.pyplot as plt
 import random
 import numpy as np
-from scipy.stats import pearsonr
-from power_law_fit import read_edgelist_from_csv,plot_degree_distribution,fit_powerlaw
-from property_evaluation import graph_analysis
-from collections import Counter
-import Graph_Sampling
 import pandas as pd
-import os
-import scipy.stats as stats
+
+
 
 
 file_path = 'data/subgraph_data/Libra1.csv'
@@ -29,7 +23,7 @@ for u, v in G.edges():
     log_mean = 7.5
     log_std = 2.5
     # Draw x from log-normal distribution
-    x = np.random.lognormal(mean=log_mean, sigma=log_std)
+    x = int(np.random.lognormal(mean=log_mean, sigma=log_std))
     G.edges[u, v]['total'] = x
     G.edges[u, v]['label'] = 0
 
@@ -180,7 +174,7 @@ def inject_clqiues(G, random_num=2, directed_num = 3,random_nodes_num=[5,8],dire
 
             add_fraud_edge(G, sender, node)
             edges.append((sender, node))
-            
+
         add_fraud_edge(G, sender, receiver)
         edges_list.append(edges)
 
